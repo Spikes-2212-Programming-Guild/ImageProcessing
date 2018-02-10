@@ -4,7 +4,7 @@ from networktables import NetworkTables
 from grip import GripPipeline
 import cv2
 from threading import Thread
-from os import system
+from subprocess import call
 
 im = None
 capturing = True
@@ -31,8 +31,8 @@ def update_image():
 
 if __name__ == "__main__":
     print "Starting"
-    system("v4l2-ctl --device=/dev/video0 -c exposure_auto=1 -c exposure_absolute=5")
-    system("v4l2-ctl --device=/dev/video1 -c exposure_auto=1 -c exposure_absolute=5")
+    call("v4l2-ctl --device=/dev/video0 -c exposure_auto=1 -c exposure_absolute=5", shell=True)
+    call("v4l2-ctl --device=/dev/video1 -c exposure_auto=1 -c exposure_absolute=5", shell=True)
     NetworkTables.initialize("10.22.12.2")# The ip of the roboRIO
     t = Thread(target=update_image)
     t.start()
