@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from networktables import NetworkTable
+from networktables import NetworkTables
 from grip import GripPipeline
 import cv2
 from threading import Thread
@@ -13,7 +13,7 @@ capturing = True
 def update_image():
     global im
     global capturing
-    nt = NetworkTable.getTable("ImageProcessing")
+    nt = NetworkTables.getTable("ImageProcessing")
     last_id = cam_id = int(nt.getNumber("currentCamera", defaultValue=0))
     cam = cv2.VideoCapture(cam_id)
     try:
@@ -33,16 +33,14 @@ if __name__ == "__main__":
     print "Starting"
     system("v4l2-ctl --device=/dev/video0 -c exposure_auto=1 -c exposure_absolute=5")
     system("v4l2-ctl --device=/dev/video1 -c exposure_auto=1 -c exposure_absolute=5")
-    NetworkTable.setClientMode()
-    NetworkTable.setIPAddress("10.22.12.2") # The ip of the roboRIO
-    NetworkTable.initialize()
+    NetworkTables.initialize("10.22.12.2")# The ip of the roboRIO
     t = Thread(target=update_image)
     t.start()
     pipeline = GripPipeline()
-    networkTableImageProcessing = NetworkTable.getTable("ImageProcessing")
+    networkTableImageProcessing = NetworkTables.getTable("ImageProcessing")
     contour_count = 2
     try:
-        while im == None or not networkTableImageProcessing.isConnected():
+        while im == None or not NetworkTables.isConnected():
             pass
 	    print "NT connection: %r" %networkTableImageProcessing.isConnected()
         [networkTableImageProcessing.delete(s) for s in networkTableImageProcessing.getKeys()]
