@@ -42,6 +42,7 @@ if __name__ == "__main__":
     try:
         while im == None or not NetworkTables.isConnected():
             pass
+            print "NT connection: %r" % NetworkTables.isConnected()
         [networkTableImageProcessing.delete(s) for s in networkTableImageProcessing.getKeys()]
         while True:
             print "Processing..."
