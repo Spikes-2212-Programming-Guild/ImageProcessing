@@ -8,12 +8,16 @@ from subprocess import call
 
 im = None
 capturing = True
+nt = None
 
+def init_nt():
+    global nt
+    nt = NetworkTables.getTable("ImageProcessing")
 
 def update_image():
     global im
     global capturing
-    nt = NetworkTables.getTable("ImageProcessing")
+    global nt
     last_id = cam_id = int(nt.getNumber("currentCamera", defaultValue=0))
     cam = cv2.VideoCapture(cam_id)
     try:
@@ -33,39 +37,40 @@ if __name__ == "__main__":
     print "Starting"
     call("v4l2-ctl --device=/dev/video0 -c exposure_auto=1 -c exposure_absolute=5", shell=True)
     call("v4l2-ctl --device=/dev/video1 -c exposure_auto=1 -c exposure_absolute=5", shell=True)
-    NetworkTables.initialize("10.22.12.2")# The ip of the roboRIO
+    NetworkTables.initialize("10.22.12.2")  # The ip of the roboRIO
+    init_nt()
     t = Thread(target=update_image)
     t.start()
     pipeline = GripPipeline()
-    networkTableImageProcessing = NetworkTables.getTable("ImageProcessing")
     contour_count = 2
+    global nt
     try:
         while im == None or not NetworkTables.isConnected():
             pass
             print "NT connection: %r" % NetworkTables.isConnected()
-        [networkTableImageProcessing.delete(s) for s in networkTableImageProcessing.getKeys()]
+        [nt.delete(s) for s in nt.getKeys()]
         while True:
             print "Processing..."
             pipeline.process(im)
             contours = sorted(pipeline.filter_contours_output, key=cv2.contourArea, reverse=True)
             contour_count = max(contour_count, len(contours))
-#            print "contours: ", len(contours)
+            #            print "contours: ", len(contours)
             for i, c in enumerate(contours):
-                networkTableImageProcessing.putNumber('contourArea%d' % i, cv2.contourArea(c))
+                nt.putNumber('contourArea%d' % i, cv2.contourArea(c))
                 print 'contourArea%d' % i, cv2.contourArea(c)
                 x, y, w, h = cv2.boundingRect(c)
-                networkTableImageProcessing.putNumber('width%d' % i, w)
+                nt.putNumber('width%d' % i, w)
                 # print 'width%d' % i, w
-                networkTableImageProcessing.putNumber('hight%d' % i, h)  # CR: typo lol
+                nt.putNumber('hight%d' % i, h)  # CR: typo lol
                 # print 'height%d' % i, h
-                networkTableImageProcessing.putNumber('x%d' % i, x)
+                nt.putNumber('x%d' % i, x)
                 # print 'x%d' % i, x
-                networkTableImageProcessing.putNumber('y%d' % i, y)
+                nt.putNumber('y%d' % i, y)
                 # print 'y%d' % i, y
-                networkTableImageProcessing.putBoolean('isUpdated%d' % i, True)
+                nt.putBoolean('isUpdated%d' % i, True)
                 print "isUpdated%d" % i, True
             for i in range(len(contours), contour_count):
-                networkTableImageProcessing.putBoolean('isUpdated%d' % i, False)
+                nt.putBoolean('isUpdated%d' % i, False)
     finally:
         capturing = False
         print "Job's done!"
