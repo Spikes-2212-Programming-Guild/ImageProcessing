@@ -14,8 +14,8 @@ cam_id = 0
 
 
 def set_exposure_for_cameras(exposure, *ids):
-    for id in ids:
-        call('v4l2-ctl --device=/dev/video{} -c exposure_auto=1 -c exposure_absolute={}'.format(id, exposure),
+    for camera_id in ids:
+        call('v4l2-ctl --device=/dev/video{} -c exposure_auto=1 -c exposure_absolute={}'.format(camera_id, exposure),
              shell=True)
 
 
@@ -34,6 +34,7 @@ def update_pipeline():
         if pipe_name is not last_name:
             if pipe_name is "reflective":
                 pipeline = reflectives.GripPipeline()
+                set_exposure_for_cameras(5, cam_id)
 
         last_name = pipe_name
 
