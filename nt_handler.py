@@ -3,6 +3,7 @@ from datetime import datetime
 from networktables import NetworkTables
 import cv2
 import reflectives_pipeline
+import powercube_pipeline
 from threading import Thread
 from subprocess import call
 
@@ -35,6 +36,9 @@ def update_pipeline():
             if pipe_name is "reflective":
                 pipeline = reflectives_pipeline.GripPipeline()
                 set_exposure_for_cameras(5, cam_id)
+            if pipe_name is "powercube":
+                pipeline = powercube_pipeline.GripPipeline()
+                set_exposure_for_cameras(9, cam_id)
 
         last_name = pipe_name
 
