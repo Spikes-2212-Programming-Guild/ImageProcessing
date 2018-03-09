@@ -10,6 +10,7 @@ im = None
 capturing = True
 pipeline = None
 nt = None
+cam_id = 0
 
 
 def init_nt():
@@ -35,6 +36,7 @@ def update_image():
     global im
     global capturing
     global nt
+    global cam_id
     last_id = cam_id = int(nt.getNumber("currentCamera", defaultValue=0))
     cam = cv2.VideoCapture(cam_id)
     try:
