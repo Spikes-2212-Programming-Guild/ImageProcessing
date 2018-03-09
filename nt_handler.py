@@ -13,6 +13,12 @@ nt = None
 cam_id = 0
 
 
+def set_exposure_for_cameras(exposure, *ids):
+    for id in ids:
+        call('v4l2-ctl --device=/dev/video{} -c exposure_auto=1 -c exposure_absolute={}'.format(id, exposure),
+             shell=True)
+
+
 def init_nt():
     global nt
     nt = NetworkTables.getTable("ImageProcessing")
@@ -57,8 +63,7 @@ def update_image():
 
 if __name__ == "__main__":
     print "Starting"
-    call("v4l2-ctl --device=/dev/video0 -c exposure_auto=1 -c exposure_absolute=5", shell=True)
-    call("v4l2-ctl --device=/dev/video1 -c exposure_auto=1 -c exposure_absolute=5", shell=True)
+    set_exposure_for_cameras(5, 0, 1)
     NetworkTables.initialize("10.22.12.2")  # The ip of the roboRIO
     init_nt()
     t_update_image = Thread(target=update_image)
