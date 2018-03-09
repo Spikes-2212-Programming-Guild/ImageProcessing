@@ -72,8 +72,6 @@ if __name__ == "__main__":
     t_update_pipeline = Thread(target=update_pipeline())
     t_update_pipeline.start()
     contour_count = 2
-    global nt
-    global pipeline
     try:
         while im == None or not NetworkTables.isConnected():
             pass
