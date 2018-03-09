@@ -13,14 +13,14 @@ class GripPipeline:
         """
 
         self.__blur_type = BlurType.Median_Filter
-        self.__blur_radius = 18.01801801801802
+        self.__blur_radius = 11.71171171171171
 
         self.blur_output = None
 
         self.__hsv_threshold_input = self.blur_output
-        self.__hsv_threshold_hue = [0.0, 62.342954159592516]
-        self.__hsv_threshold_saturation = [199.5053956834532, 255.0]
-        self.__hsv_threshold_value = [0.0, 151.0950764006791]
+        self.__hsv_threshold_hue = [21.043165467625897, 62.342954159592516]
+        self.__hsv_threshold_saturation = [149.05575539568346, 255.0]
+        self.__hsv_threshold_value = [29.81115107913669, 122.95415959252972]
 
         self.hsv_threshold_output = None
 
@@ -30,7 +30,7 @@ class GripPipeline:
         self.find_contours_output = None
 
         self.__filter_contours_contours = self.find_contours_output
-        self.__filter_contours_min_area = 300.0
+        self.__filter_contours_min_area = 500.0
         self.__filter_contours_min_perimeter = 0.0
         self.__filter_contours_min_width = 50.0
         self.__filter_contours_max_width = 1000.0
@@ -116,7 +116,7 @@ class GripPipeline:
         else:
             mode = cv2.RETR_LIST
         method = cv2.CHAIN_APPROX_SIMPLE
-        im2, contours, hierarchy =cv2.findContours(input, mode=mode, method=method)
+        contours, hierarchy =cv2.findContours(input, mode=mode, method=method)
         return contours
 
     @staticmethod
@@ -165,5 +165,5 @@ class GripPipeline:
         return output
 
 
-BlurType = Enum('BlurType', 'Box_Blur Gaussian_Blur Median_Filter Bilateral_Filter')
+BlurType = Enum('BlurType', 'Box_Blur', 'Gaussian_Blur', 'Median_Filter', 'Bilateral_Filter')
 
