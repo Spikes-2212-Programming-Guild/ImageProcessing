@@ -2,7 +2,7 @@ from datetime import datetime
 
 from networktables import NetworkTables
 import cv2
-import reflectives
+import reflectives_pipeline
 from threading import Thread
 from subprocess import call
 
@@ -33,7 +33,7 @@ def update_pipeline():
         pipe_name = nt.getString("pipelineName", defaultValue="reflective")
         if pipe_name is not last_name:
             if pipe_name is "reflective":
-                pipeline = reflectives.GripPipeline()
+                pipeline = reflectives_pipeline.GripPipeline()
                 set_exposure_for_cameras(5, cam_id)
 
         last_name = pipe_name
