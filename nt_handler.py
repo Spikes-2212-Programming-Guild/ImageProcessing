@@ -39,12 +39,15 @@ def update_image():
     cam = cv2.VideoCapture(cam_id)
     try:
         while capturing:
-            cam_id = int(nt.getNumber("currentCamera", defaultValue=0))
-            if last_id != cam_id:
-                cam.release()
-                cam = cv2.VideoCapture(cam_id)
-            last_id = cam_id
-            success, im = cam.read()
+            try:
+                cam_id = int(nt.getNumber("currentCamera", defaultValue=0))
+                if last_id != cam_id:
+                    cam.release()
+                    cam = cv2.VideoCapture(cam_id)
+                last_id = cam_id
+                success, im = cam.read()
+            except Exception:
+                continue
     finally:
         cam.release()
         print "Thread's done!"
