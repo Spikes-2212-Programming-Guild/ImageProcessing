@@ -2,8 +2,8 @@ from datetime import datetime
 
 from networktables import NetworkTables
 import cv2
-import reflectives
-import power_cube_working_one
+import reflectives_pipeline
+import powercube_pipeline
 from threading import Thread
 from subprocess import call
 
@@ -34,10 +34,10 @@ def update_pipeline():
         pipe_name = nt.getString("pipelineName", defaultValue="reflective")
         if pipe_name is not last_name:
             if pipe_name is "reflective":
-                pipeline = reflectives.GripPipeline()
+                pipeline = reflectives_pipeline.GripPipeline()
                 set_exposure_for_cameras(5, cam_id)
             if pipe_name is "power-cube":
-                pipeline = power_cube_working_one.GripPipeline()
+                pipeline = powercube_pipeline.GripPipeline()
                 set_exposure_for_cameras(9, cam_id)
 
         last_name = pipe_name
@@ -76,8 +76,6 @@ if __name__ == "__main__":
     t_update_pipeline = Thread(target=update_pipeline())
     t_update_pipeline.start()
     contour_count = 2
-    global nt
-    global pipeline
     try:
         while im == None or not NetworkTables.isConnected():
             pass
