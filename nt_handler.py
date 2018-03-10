@@ -36,7 +36,7 @@ def update_pipeline():
             if pipe_name is "reflective":
                 pipeline = reflectives.GripPipeline()
                 set_exposure_for_cameras(5, cam_id)
-            if pipe_name is "powercube":
+            if pipe_name is "power-cube":
                 pipeline = power_cube_working_one.GripPipeline()
                 set_exposure_for_cameras(9, cam_id)
 
@@ -103,6 +103,7 @@ if __name__ == "__main__":
                     nt.putNumber('y%d' % i, y)
                     # print 'y%d' % i, y
                     nt.putBoolean('isUpdated%d' % i, True)
+                    nt.putNumber('numberOfContours', len(contours))
                     print "isUpdated%d" % i, True
                 for i in range(len(contours), contour_count):
                     nt.putBoolean('isUpdated%d' % i, False)
