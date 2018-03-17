@@ -22,6 +22,7 @@ def set_exposure_for_cameras(exposure, *ids):
 
 def init_nt():
     global nt
+    NetworkTables.initialize("10.22.12.2") # The ip of the roboRIO
     nt = NetworkTables.getTable("ImageProcessing")
 
 
@@ -30,23 +31,19 @@ def update_pipeline():
     global nt
     global pipeline
     global cam_id
-    last_name = ""
-    pipe_name = nt.getString("pipelineName", defaultValue="power-cube")
+    last_pipe_name = ""
     try:
         while capturing:
-            pipe_name = nt.getString("pipelineName", defaultValue="power-cube")
-            print "pipeline name is " + pipe_name
-            if pipe_name is not last_name:
-                if pipe_name == "ref":
-                    print "switching to reflective"
+            pipe_name = nt.getString("pipelineName", defaultValue="reflective")
+            if pipe_name is not last_pipe_name:
+                if pipe_name == "reflective":
                     pipeline = reflectives_pipeline.GripPipeline()
                     set_exposure_for_cameras(5, cam_id)
                 if pipe_name == "power-cube":
-                    print "switching to power cube"
                     pipeline = powercube_pipeline.GripPipeline()
                     set_exposure_for_cameras(9, cam_id)
 
-            last_name = pipe_name
+            last_pipe_name = pipe_name
     finally:
         print('Update pipeline is done')
 
@@ -58,11 +55,9 @@ def update_image():
     global cam_id
     last_id = cam_id = int(nt.getNumber("currentCamera", defaultValue=0))
     cam = cv2.VideoCapture(cam_id)
-    print "cam id is " + str(cam_id)
     try:
         while capturing:
             try:
-                # print "capturing image"
                 cam_id = int(nt.getNumber("currentCamera", defaultValue=0))
                 if last_id != cam_id:
                     cam.release()
@@ -70,7 +65,7 @@ def update_image():
                 last_id = cam_id
                 success, im = cam.read()
             except Exception:
-                print "Exception"
+                print "Exception In Update Image"
                 continue
     finally:
         cam.release()
@@ -79,12 +74,10 @@ def update_image():
 
 if __name__ == "__main__":
     print "Starting"
-    set_exposure_for_cameras(5, 0, 1)
-    NetworkTables.initialize("10.22.12.2")  # The ip of the roboRIO
+    set_exposure_for_cameras(5, 0)
     init_nt()
     t_update_image = Thread(target=update_image)
     t_update_image.start()
-    # init_nt()
     t_update_pipeline = Thread(target=update_pipeline)
     t_update_pipeline.start()
     contour_count = 2
@@ -92,12 +85,11 @@ if __name__ == "__main__":
         while im == None or not NetworkTables.isConnected():
             pass
             #        print "NT connection: %r" % NetworkTables.isConnected()
-        [nt.delete(s) for s in nt.getKeys()]
+        [nt.delete(key) for key in nt.getKeys()]
         print "starting processing"
         while True:
-            # print "Processing..."
             if pipeline is not None:
-                print "has pipeline"
+                print "Processing..."
                 try:
                     pipeline.process(im)
                     contours = sorted(pipeline.filter_contours_output, key=cv2.contourArea, reverse=True)
