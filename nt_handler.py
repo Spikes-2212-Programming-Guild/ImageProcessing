@@ -9,19 +9,22 @@ import subprocess
 im = None
 capturing = True
 
+WIDTH = 320
+HEIGHT = 180
+
 
 def update_image():
     global im
     global capturing
     nt = NetworkTables.getTable("ImageProcessing")
     last_id = cam_id = int(nt.getNumber("currentCamera", defaultValue=0))
-    cam = cv2.VideoCapture(cam_id)
+    cam = create_camera(cam_id)
     try:
         while capturing:
             cam_id = int(nt.getNumber("currentCamera", defaultValue=0))
             if last_id != cam_id:
                 cam.release()
-                cam = cv2.VideoCapture(cam_id)
+                cam = create_camera(cam_id)
             last_id = cam_id
             success, im = cam.read()
     finally:
@@ -33,6 +36,10 @@ def set_camera_exposure(camera_id: int, exposure: int) -> int:
     return subprocess.call("v4l2-ctl --device=/dev/video{} -c exposure_auto=1 exposure_absolute={}"
                            .format(camera_id, exposure))
 
+def create_camera(cam_id: int) -> cv2.VideoCapture:
+    cam = cv2.VideoCapture(cam_id)
+    set_camera_resolution(cam, WIDTH, HEIGHT)
+    return cam
 
 def set_camera_resolution(camera: cv2.VideoCapture, width: int, height: int):
     camera.set(cv2.CAP_PROP_FRAME_WIDTH, width)
