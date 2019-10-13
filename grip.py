@@ -13,6 +13,7 @@ class GripPipeline:
         """initializes all values to presets or None if need to be set
         """
 
+        self.convex_hulls_output = []
         self.__blur_type = BlurType.Median_Filter
         self.__blur_radius = 0.0
 
@@ -81,11 +82,12 @@ class GripPipeline:
                                                                self.__filter_contours_min_vertices,
                                                                self.__filter_contours_min_ratio,
                                                                self.__filter_contours_max_ratio)
-
         # Step Mask0:
         self.__mask_input = source0
         self.__mask_mask = self.hsv_threshold_output
         (self.mask_output) = self.__mask(self.__mask_input, self.__mask_mask)
+
+        self.convex_hulls_output = self.__convex_hulls(self.filter_contours_output)
 
     @staticmethod
     def __blur(src, type, radius):
@@ -195,6 +197,15 @@ class GripPipeline:
             A three channel numpy.ndarray.
         """
         return cv2.bitwise_and(input, input, mask=mask)
+
+    @staticmethod
+    def __convex_hulls(contours):
+        output = []
+
+        for contour in contours:
+            output.append(cv2.convexHull(contour, False))
+
+        return output
 
 
 class BlurType(Enum):

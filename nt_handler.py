@@ -4,7 +4,7 @@ from networktables import NetworkTables
 from grip import GripPipeline
 import cv2
 from threading import Thread
-from subprocess import call
+import subprocess
 
 im = None
 capturing = True
@@ -29,11 +29,25 @@ def update_image():
         print("Thread's done!")
 
 
+def set_camera_exposure(camera_id: int, exposure: int) -> int:
+    return subprocess.call("v4l2-ctl --device=/dev/video{} -c exposure_auto=1 exposure_absolute={}"
+                           .format(camera_id, exposure))
+
+
+def set_camera_resolution(camera: cv2.VideoCapture, width: int, height: int):
+    camera.set(cv2.CAP_PROP_FRAME_WIDTH, width)
+    camera.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+
+
 if __name__ == "__main__":
-    print("Starting")
-    call("v4l2-ctl --device=/dev/video0 -c exposure_auto=1 -c exposure_absolute=5", shell=True)
-    call("v4l2-ctl --device=/dev/video1 -c exposure_auto=1 -c exposure_absolute=5", shell=True)
+    print("Starting Vision Script")
     NetworkTables.initialize("10.22.12.2")  # The ip of the roboRIO
+    print("Successfully Connected To roboRIO")
+    if set_camera_exposure(0, 5) == 0:
+        print("Exposure Was Successfully Set For /dev/video0")
+    if set_camera_exposure(1, 5) == 0:
+        print("Exposure Was Successfully Set For /dev/video1")
+
     t = Thread(target=update_image)
     t.start()
     pipeline = GripPipeline()
@@ -47,7 +61,7 @@ if __name__ == "__main__":
         while True:
             print("Processing...")
             pipeline.process(im)
-            contours = sorted(pipeline.filter_contours_output, key=cv2.contourArea, reverse=True)
+            contours = sorted(pipeline.convex_hulls_output, key=cv2.contourArea, reverse=True)
             contour_count = max(contour_count, len(contours))
             #            print "contours: ", len(contours)
             for i, c in enumerate(contours):
