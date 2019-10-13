@@ -36,17 +36,19 @@ def set_camera_exposure(camera_id: int, exposure: int) -> int:
     return subprocess.call("v4l2-ctl --device=/dev/video{} -c exposure_auto=1 exposure_absolute={}"
                            .format(camera_id, exposure))
 
+
 def create_camera(cam_id: int) -> cv2.VideoCapture:
     cam = cv2.VideoCapture(cam_id)
     set_camera_resolution(cam, WIDTH, HEIGHT)
     return cam
+
 
 def set_camera_resolution(camera: cv2.VideoCapture, width: int, height: int):
     camera.set(cv2.CAP_PROP_FRAME_WIDTH, width)
     camera.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
 
 
-if __name__ == "__main__":
+def main():
     print("Starting Vision Script")
     NetworkTables.initialize("10.22.12.2")  # The ip of the roboRIO
     print("Successfully Connected To roboRIO")
@@ -90,3 +92,7 @@ if __name__ == "__main__":
     finally:
         capturing = False
         print("Job's done!")
+
+
+if __name__ == "__main__":
+    main()
